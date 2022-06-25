@@ -1,12 +1,21 @@
-import dotenv from 'dotenv';
-import { env } from 'process';
-import {} from 'process';
+import { httpServer } from '../front/http_server/index';
+import { WebSocketServer } from 'ws';
+import { router } from './modules/router';
 
-dotenv.config();
-const { PORT } = env;
+const HTTP_PORT = 3000;
 
-console.log(PORT);
+console.log(`Start static http server on the ${HTTP_PORT} port!`);
+httpServer.listen(HTTP_PORT);
 
-const a = 5;
+const wss = new WebSocketServer({ port: 8080 });
 
-console.log(a);
+wss.on('connection', (ws) => {
+  ws.on('message', (buffer) => {
+    const data = buffer.toString();
+    router(ws, data);
+
+    console.log(data);
+  });
+
+  /* ws.send('HELLLOOOO'); */
+});
