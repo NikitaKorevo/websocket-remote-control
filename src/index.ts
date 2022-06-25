@@ -16,6 +16,9 @@ wss.on('connection', (ws) => {
 
     console.log(data);
   });
+});
 
-  /* ws.send('HELLLOOOO'); */
+process.on('SIGINT', () => {
+  console.log('WebSocketServer closed');
+  process.exit();
 });
