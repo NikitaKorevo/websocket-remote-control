@@ -13,8 +13,6 @@ wss.on('connection', (ws) => {
   ws.on('message', (buffer) => {
     const data = buffer.toString();
     router(ws, data);
-
-    console.log(data);
   });
 });
 

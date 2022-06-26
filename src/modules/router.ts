@@ -1,83 +1,52 @@
 import { WebSocket } from 'ws';
-import {
-  dragMouse,
-  getMousePos,
-  mouseToggle,
-  moveMouse,
-  moveMouseSmooth,
-  setMouseDelay,
-} from 'robotjs';
 import Jimp from 'jimp';
+import { mouseNavigation } from './mouseNavigation';
+import { Commands } from '../types';
+import { figureDrawing } from './figureDrawing';
 
 export const router = (ws: WebSocket, data: string) => {
   const [command, firstParameter, secondParameter, ...otherParameters] = data.split(' ');
+  console.log(command);
 
-  const { x, y } = getMousePos();
+  const { mouseUp, mouseRight, mouseDown, mouseLeft, mousePosition } = mouseNavigation(
+    ws,
+    command,
+    firstParameter
+  );
+  const { drawCircle, drawSquare, drawRectangle } = figureDrawing(
+    ws,
+    command,
+    firstParameter,
+    secondParameter
+  );
 
   switch (command) {
-    case 'mouse_up':
-      moveMouse(x, y - +firstParameter);
-      ws.send(command + '\0');
-      break;
+    case Commands.Mouse_up:
+      return mouseUp();
 
-    case 'mouse_right':
-      moveMouse(x + +firstParameter, y);
-      ws.send(command + '\0');
-      break;
+    case Commands.Mouse_right:
+      return mouseRight();
 
-    case 'mouse_down':
-      moveMouse(x, y + +firstParameter);
-      ws.send(command + '\0');
-      break;
+    case Commands.Mouse_down:
+      return mouseDown();
 
-    case 'mouse_left':
-      moveMouse(x - +firstParameter, y);
-      ws.send(command + '\0');
-      break;
+    case Commands.Mouse_left:
+      return mouseLeft();
 
-    case 'mouse_position':
-      ws.send(`${command} ${x},${y}`);
-      break;
+    case Commands.Mouse_position:
+      return mousePosition();
 
-    case 'draw_circle':
-      setMouseDelay(2);
-      mouseToggle('down');
+    case Commands.Draw_circle:
+      return drawCircle();
 
-      for (let i = 0; i <= Math.PI * 2; i += 0.01) {
-        const x1 = x + +firstParameter * Math.cos(i) - +firstParameter;
-        const y1 = y + +firstParameter * Math.sin(i);
+    case Commands.Draw_square:
+      return drawSquare();
 
-        dragMouse(x1, y1);
-      }
+    case Commands.Draw_rectangle:
+      return drawRectangle();
 
-      mouseToggle('up');
-      break;
-
-    case 'draw_square':
-      ws.send(command);
-      mouseToggle('down');
-
-      moveMouseSmooth(x, y);
-      moveMouseSmooth(x + +firstParameter, y);
-      moveMouseSmooth(x + +firstParameter, y + +firstParameter);
-      moveMouseSmooth(x, y + +firstParameter);
-      moveMouseSmooth(x, y);
-
-      mouseToggle('up');
-      break;
-
-    case 'draw_rectangle':
-      ws.send(command);
-      mouseToggle('down');
-
-      moveMouseSmooth(x, y);
-      moveMouseSmooth(x + +firstParameter, y);
-      moveMouseSmooth(x + +firstParameter, y + +secondParameter);
-      moveMouseSmooth(x, y + +secondParameter);
-      moveMouseSmooth(x, y);
-
-      mouseToggle('up');
-      break;
+    case Commands.Prnt_scrn:
+      return;
 
     default:
       break;
