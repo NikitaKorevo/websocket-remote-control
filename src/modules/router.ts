@@ -1,12 +1,11 @@
 import { WebSocket } from 'ws';
-import Jimp from 'jimp';
 import { mouseNavigation } from './mouseNavigation';
 import { Commands } from '../types';
 import { figureDrawing } from './figureDrawing';
+import { screenImage } from './screenImage';
 
 export const router = (ws: WebSocket, data: string) => {
-  const [command, firstParameter, secondParameter, ...otherParameters] = data.split(' ');
-  console.log(command);
+  const [command, firstParameter, secondParameter] = data.split(' ');
 
   const { mouseUp, mouseRight, mouseDown, mouseLeft, mousePosition } = mouseNavigation(
     ws,
@@ -19,6 +18,7 @@ export const router = (ws: WebSocket, data: string) => {
     firstParameter,
     secondParameter
   );
+  const { getScreenImage } = screenImage(ws, command);
 
   switch (command) {
     case Commands.Mouse_up:
@@ -46,7 +46,7 @@ export const router = (ws: WebSocket, data: string) => {
       return drawRectangle();
 
     case Commands.Prnt_scrn:
-      return;
+      return getScreenImage();
 
     default:
       break;
